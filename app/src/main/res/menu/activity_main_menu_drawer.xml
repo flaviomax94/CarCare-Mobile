@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+
+
+
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/icona_home"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/nav_garage"
+            android:icon="@drawable/garage_nero"
+            android:title="My car" />
+        <item
+            android:id="@+id/nav_rpm"
+            android:icon="@drawable/rpm_nero"
+            android:title="Live Values" />
+        <item
+            android:id="@+id/nav_graph"
+            android:icon="@drawable/grafico_nero"
+            android:title="Graphline Chart" />
+
+        <item
+            android:id="@+id/nav_notifications"
+            android:icon="@drawable/icon_notification"
+            android:title="Notification" />
+        <item
+            android:id="@+id/nav_bluetooth"
+            android:icon="@drawable/bluetooth_nero"
+            android:title="Bluetooth Connection" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Send" />
+        </menu>
+    </item>
+
+</menu>
