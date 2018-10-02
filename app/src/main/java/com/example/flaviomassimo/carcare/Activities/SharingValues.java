@@ -1,5 +1,6 @@
 package com.example.flaviomassimo.carcare.Activities;
 
+import com.example.flaviomassimo.carcare.DataBase.Rpm;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -11,7 +12,7 @@ public class SharingValues {
     private static boolean logout=false;
     private static FirebaseUser user;
     private static FirebaseAuth auth;
-
+    private static LinkedList<Rpm> RpmList= new LinkedList<>();
     public static void setFullName(String name){
 
         FullName=name;
@@ -50,5 +51,14 @@ public static boolean getLogOut(){
 
         return user;
     }
+    public static LinkedList<Rpm> getRpmList(){
+
+
+        return RpmList;
+    }
+    public static void setRpmList(LinkedList<Rpm> list){
+        RpmList=list;
+    }
+
 
 }

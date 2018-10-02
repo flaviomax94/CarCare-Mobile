@@ -26,6 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
+            android:fontFamily="@font/biorhyme"
             android:text="Email connected:"
             android:textColor="@android:color/black"
             android:textSize="30sp" />
@@ -34,14 +35,16 @@
             android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/biorhyme"
             android:text="Signed out"
             android:textColor="@android:color/black"
             android:textSize="30sp" />
 
         <TextView
             android:id="@+id/detail"
-            android:layout_width="wrap_content"
+            android:layout_width="373dp"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/biorhyme"
             android:textColor="@android:color/black"
             android:textSize="25sp"
             tools:text="Firebase User ID: 123456789abc" />

@@ -7,24 +7,21 @@
 
 
 
-        <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/icona_home"
-            android:title="Home" />
+
 
         <item
             android:id="@+id/nav_garage"
             android:icon="@drawable/garage_nero"
             android:title="My car" />
-        <item
-            android:id="@+id/nav_rpm"
-            android:icon="@drawable/rpm_nero"
-            android:title="Live Values" />
+
         <item
             android:id="@+id/nav_graph"
             android:icon="@drawable/grafico_nero"
-            android:title="Graphline Chart" />
-
+            android:title="Graphline Chart and Live Values" />
+        <item
+            android:id="@+id/nav_paths"
+            android:icon="@drawable/icon_road"
+            android:title="Previous Paths" />
         <item
             android:id="@+id/nav_notifications"
             android:icon="@drawable/icon_notification"

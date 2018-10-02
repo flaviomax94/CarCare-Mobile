@@ -1,9 +1,7 @@
 package com.example.flaviomassimo.carcare.Activities;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,17 +16,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
+import com.example.flaviomassimo.carcare.Activities.Other.BluetoothSocketShare;
 import com.example.flaviomassimo.carcare.Fragment.*;
 import com.example.flaviomassimo.carcare.R;
 
 public class MainMenuActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, BluetoothFragment.OnFragmentInteractionListener,
-        HomeFragment.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,GraphFragment.OnFragmentInteractionListener,
-        CarFragment.OnFragmentInteractionListener,RPM_Fragment.OnFragmentInteractionListener {
-
+        implements NavigationView.OnNavigationItemSelectedListener,BluetoothAlertFragment.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,
+        CarFragment.OnFragmentInteractionListener{
+    BluetoothSocket socket = BluetoothSocketShare.getBluetoothSocket();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,18 +90,37 @@ public class MainMenuActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
-        } else if (id == R.id.nav_garage) {
+        if (id == R.id.nav_garage) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CarFragment()).commit();
-        } else if (id == R.id.nav_rpm) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new RPM_Fragment()).commit();
-        } else if (id == R.id.nav_graph) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new GraphFragment()).commit();
-        } else if (id == R.id.nav_notifications) {
+        }
+
+        else if (id == R.id.nav_paths) {}
+        else if (id == R.id.nav_graph) {
+            if(socket==null)
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+            else if(!socket.isConnected())
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+            else if(socket.isConnected()){
+                if(BluetoothSocketShare.getBluetoothSocket().getRemoteDevice().getName().contains("OBD")){
+            Intent i = new Intent(MainMenuActivity.this,GraphLineActivity.class);
+            startActivity(i);}
+            else
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+            }
+        }
+        else if (id == R.id.nav_notifications) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new NotificationFragment()).commit();
-        } else if (id == R.id.nav_bluetooth) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothFragment()).commit();
+        }
+        else if (id == R.id.nav_bluetooth) {
+            if(socket==null){
+                Intent i = new Intent(MainMenuActivity.this,BluetoothActivity.class);
+                 startActivity(i);}
+            else if(!socket.isConnected()){
+                Intent i = new Intent(MainMenuActivity.this,BluetoothActivity.class);
+                startActivity(i);}
+            else if(socket.isConnected()){
+                Intent i = new Intent(MainMenuActivity.this,BluetoothDisconnectActivity.class);
+                startActivity(i);}
         }
         else if(id==R.id.nav_logout){
 
