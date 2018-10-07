@@ -1,12 +1,12 @@
 package com.example.flaviomassimo.carcare.Activities;
 
 import android.annotation.SuppressLint;
+
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,31 +16,66 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.flaviomassimo.carcare.Activities.Other.BluetoothSocketShare;
 import com.example.flaviomassimo.carcare.Fragment.*;
 import com.example.flaviomassimo.carcare.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,BluetoothAlertFragment.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,
-        CarFragment.OnFragmentInteractionListener{
+        CarFragment.OnFragmentInteractionListener,View.OnClickListener {
     BluetoothSocket socket = BluetoothSocketShare.getBluetoothSocket();
+    private DatabaseReference mRef;
+    private FirebaseAuth fireBaseAuth;
+    private EditText first,last;
+    private TextView text;
+    private Button addName;
+    String last_name,first_name;
+    String UID;
+    FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        text=(TextView) findViewById(R.id.welcome);
+        first=(EditText) findViewById(R.id.First);
+        last=(EditText) findViewById(R.id.Last);
+        findViewById(R.id.buttonNameSurname).setOnClickListener(this);
+        addName=(Button) findViewById(R.id.buttonNameSurname);
+        setVisibility(false);
+        user=FirebaseAuth.getInstance().getCurrentUser();
+        UID=user.getUid().toString();
+        mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
+        mRef.child("Users").child(UID).child("Email").setValue(user.getEmail().toString());
+        mRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.child("Users").child(UID).hasChild("Name"))setVisibility(true);
+                else{
+                    String o=dataSnapshot.child("Users").child(UID).child("Name").getValue().toString();
+                    String temp="Hey "+o+"!\n"+text.getText().toString();
+                    text.setText(temp);
+                }
+                    //showData(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -49,6 +84,39 @@ public class MainMenuActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void setVisibility(Boolean bool){
+        if(bool){
+
+            addName.setVisibility(View.VISIBLE);
+            first.setVisibility(View.VISIBLE);
+            last.setVisibility(View.VISIBLE);
+        }
+        else{addName.setVisibility(View.GONE);
+            first.setVisibility(View.GONE);
+            last.setVisibility(View.GONE);}
+
+
+    }
+    private void onClickInsertion(){
+
+        if(validateForm()){
+                 mRef.child("Users").child(UID).child("Name").setValue(first_name+" "+last_name);
+                 SharingValues.setDBUser(user.getEmail().toString(),first_name+" "+last_name);
+            Intent j =new Intent(MainMenuActivity.this,MainMenuActivity.class);
+            startActivity(j);
+            finish();
+
+        }
+
+
+    }
+    private void showData(DataSnapshot dataSnapshot) {
+
+        for(DataSnapshot ds: dataSnapshot.getChildren()) {
+
+        }
     }
 
     @Override
@@ -92,25 +160,49 @@ public class MainMenuActivity extends AppCompatActivity
 
         if (id == R.id.nav_garage) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CarFragment()).commit();
+            setVisibility(false);
         }
 
+
+        else if (id == R.id.nav_home) {
+            Intent i = new Intent(MainMenuActivity.this,MainMenuActivity.class);
+             startActivity(i);
+             finish();
+        }
+
+
         else if (id == R.id.nav_paths) {}
+
+
         else if (id == R.id.nav_graph) {
-            if(socket==null)
+            if(socket==null){
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
-            else if(!socket.isConnected())
+                setVisibility(false);
+            }
+            else if(!socket.isConnected()){
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+                setVisibility(false);
+            }
             else if(socket.isConnected()){
                 if(BluetoothSocketShare.getBluetoothSocket().getRemoteDevice().getName().contains("OBD")){
-            Intent i = new Intent(MainMenuActivity.this,GraphLineActivity.class);
-            startActivity(i);}
-            else
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+                        Intent i = new Intent(MainMenuActivity.this,GraphLineActivity.class);
+                        startActivity(i);
+
+                    }
+                else{
+                        setVisibility(false);
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+                    }
+                 }
             }
-        }
+
+
         else if (id == R.id.nav_notifications) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new NotificationFragment()).commit();
+            setVisibility(false);
         }
+
+
         else if (id == R.id.nav_bluetooth) {
             if(socket==null){
                 Intent i = new Intent(MainMenuActivity.this,BluetoothActivity.class);
@@ -137,5 +229,36 @@ public class MainMenuActivity extends AppCompatActivity
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+    private boolean validateForm() {
+        boolean valid = true;
+
+        first_name = first.getText().toString();
+        if (TextUtils.isEmpty(first_name)) {
+            first.setError("Required.");
+            valid = false;
+        } else {
+            first.setError(null);
+        }
+
+        last_name = last.getText().toString();
+        if (TextUtils.isEmpty(last_name)) {
+            last.setError("Required.");
+            valid = false;
+        } else {
+            last.setError(null);
+        }
+
+        return valid;
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        int i = v.getId();
+        if (i == R.id.buttonNameSurname) {
+            onClickInsertion();
+
+        }
     }
 }

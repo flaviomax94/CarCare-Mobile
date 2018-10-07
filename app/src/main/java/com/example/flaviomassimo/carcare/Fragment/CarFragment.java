@@ -1,14 +1,28 @@
 package com.example.flaviomassimo.carcare.Fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.PopupMenu;
+import android.widget.Spinner;
 
+import com.example.flaviomassimo.carcare.Activities.MainMenuActivity;
+import com.example.flaviomassimo.carcare.DataBase.Car;
 import com.example.flaviomassimo.carcare.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,7 +32,7 @@ import com.example.flaviomassimo.carcare.R;
  * Use the {@link CarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CarFragment extends Fragment {
+public class CarFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -29,7 +43,14 @@ public class CarFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-
+    private Spinner showMenu;
+    private EditText license,make,model,km;
+    private Button addCar;
+    private Car car=new Car();
+    private DatabaseReference mRef;
+    String UID;
+    FirebaseUser user;
+    private static final String[] items = {"Gasoline", "Petrol", "GPL", "Other"};
     public CarFragment() {
         // Required empty public constructor
     }
@@ -55,17 +76,54 @@ public class CarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_car, container, false);
+        View view= inflater.inflate(R.layout.fragment_car, container, false);
+        user= FirebaseAuth.getInstance().getCurrentUser();
+        UID=user.getUid().toString();
+        mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
+
+        showMenu=(Spinner) view.findViewById(R.id.show_dropdown_menu);
+        license=(EditText) view.findViewById(R.id.LicensePlate);
+        make=(EditText) view.findViewById(R.id.Make);
+        model=(EditText) view.findViewById(R.id.Model);
+        km=(EditText) view.findViewById(R.id.Km);
+        addCar=(Button) view.findViewById(R.id.addButton);
+        addCar.setOnClickListener(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        showMenu.setAdapter(adapter);
+        showMenu.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        car.setFUEL_TYPE("Gasoline");
+                        break;
+                    case 1:
+                        car.setFUEL_TYPE("Petrol");
+                        break;
+                    case 2:
+                        car.setFUEL_TYPE("GPL");
+                        break;
+                    case 3:
+                        car.setFUEL_TYPE("Other");
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        return view;
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,6 +148,85 @@ public class CarFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onClick(View v) {
+        int i = v.getId();
+        if(i==R.id.addButton){ createCar(); }
+    }
+
+
+
+
+
+    private void createCar(){
+        if(validateForm()){
+            car.setLICENSE_PLATE(license.getText().toString());
+            car.setKM(Double.parseDouble(km.getText().toString()));
+            if(make.getText()!=null){
+                car.setMAKE(make.getText().toString());
+            }
+            if(model.getText()!=null){
+                car.setMODEL(model.getText().toString());
+            }
+            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE());
+            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Make").setValue(car.getMAKE());
+            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Model").setValue(car.getMODEL());
+            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Km").setValue(car.getKM());
+            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Fuel").setValue(car.getFUEL_TYPE());
+            System.out.println(car.getKM()+" "+car.getLICENSE_PLATE()+" "+car.getMAKE()+" "+car.getMODEL()+" "+car.getFUEL_TYPE());
+            Intent j =new Intent(getActivity(), MainMenuActivity.class); startActivity(j);
+        }
+
+    }
+    private boolean validateForm() {
+        boolean valid = true;
+
+        String plate = license.getText().toString();
+        if (TextUtils.isEmpty(plate)) {
+            license.setError("Required.");
+            valid = false;
+        } else {
+            license.setError(null);
+        }
+
+        String kilometers = km.getText().toString();
+        if (TextUtils.isEmpty(kilometers)) {
+            km.setError("Required.");
+            valid = false;
+        } else {
+            km.setError(null);
+        }
+
+        return valid;
+    }
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        int i= view.getId();
+        if(i==R.id.show_dropdown_menu){
+            switch (position) {
+                case 0:
+                    car.setFUEL_TYPE("Gasoline");
+                    break;
+                case 1:
+                    car.setFUEL_TYPE("Petrol");
+                    break;
+                case 2:
+                    car.setFUEL_TYPE("GPL");
+                    break;
+                case 3:
+                    car.setFUEL_TYPE("Other");
+                    break;
+            }
+
+
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     /**

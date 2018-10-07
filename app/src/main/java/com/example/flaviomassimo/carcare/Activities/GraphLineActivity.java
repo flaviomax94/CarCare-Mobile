@@ -81,7 +81,12 @@ public class GraphLineActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed(){
+        Intent i=new Intent(GraphLineActivity.this,MainMenuActivity.class);
+        startActivity(i);
 
+    }
 
     public static void addValuetoGraph(Entry entry){
         if(!entry.equalTo(null)){

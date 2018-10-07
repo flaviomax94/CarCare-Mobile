@@ -43,23 +43,6 @@ public class BluetoothActivity extends AppCompatActivity {
         System.out.println(output);
         initFile();
 
-        CharSequence fuel[] = new CharSequence[] {"Gasoline", "Petrol", "GPL", "Other"};
-
-        builder = new AlertDialog.Builder(this,R.style.AlertDialogStyle);
-        builder.setTitle("Select your car's fuel type");
-        builder.setItems(fuel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String fueltype="";
-                if(which==0) fueltype="Gasoline";
-                if(which==1) fueltype="Petrol";
-                if(which==2) fueltype="GPL";
-                if(which==3) fueltype="Other";
-                BluetoothSocketShare.setFuelType(fueltype);
-            }
-        });
-        if(BluetoothSocketShare.getFuelType()==null)
-            builder.show();
 
     }
 
@@ -179,7 +162,12 @@ public class BluetoothActivity extends AppCompatActivity {
         }
 
     }
+    @Override
+    public void onBackPressed(){
+        Intent i=new Intent(BluetoothActivity.this,MainMenuActivity.class);
+        startActivity(i);
 
+    }
 
 
 }

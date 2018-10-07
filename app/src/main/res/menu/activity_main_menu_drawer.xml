@@ -8,6 +8,10 @@
 
 
 
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/icona_home"
+            android:title="Home" />
 
         <item
             android:id="@+id/nav_garage"

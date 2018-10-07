@@ -6,12 +6,77 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".Activities.MainMenuActivity"
-    tools:showIn="@layout/app_bar_main_menu">
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/fragment_container">
-    </FrameLayout>
+    tools:showIn="@layout/app_bar_main_menu"
+    android:background="?android:windowBackground">
 
+
+
+        <RelativeLayout
+
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/First"
+                android:layout_width="192dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="75dp"
+                android:ems="10"
+                android:hint="First Name"
+                android:inputType="textPersonName"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintVertical_bias="0.848" />
+
+            <EditText
+                android:id="@+id/Last"
+                android:layout_width="192dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/First"
+                android:ems="10"
+                android:hint="Last Name"
+                android:inputType="textPersonName"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.848" />
+
+            <Button
+                android:id="@+id/buttonNameSurname"
+                android:layout_width="207dp"
+                android:layout_height="49dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="19dp"
+                android:background="@drawable/my_button"
+                android:onClick="onClick"
+                android:text="Insert informations"
+                android:textColor="@color/colorAccent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.965" />
+
+            <TextView
+                android:id="@+id/welcome"
+                android:layout_width="327dp"
+                android:layout_height="329dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="23dp"
+                android:fontFamily="@font/biorhyme"
+                android:text="Welcome in CarCare! This application allows you to manage your vehicles and to see if your driving style is too reckless. Be careful and don't go too fast!"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent"
+                android:textSize="24sp" />
+        </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

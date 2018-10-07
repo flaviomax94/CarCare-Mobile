@@ -1,5 +1,6 @@
 package com.example.flaviomassimo.carcare.Activities;
 
+import com.example.flaviomassimo.carcare.DataBase.User;
 import com.example.flaviomassimo.carcare.DataBase.Rpm;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -10,6 +11,7 @@ public class SharingValues {
 
     private static String FullName="";
     private static boolean logout=false;
+    private static User DBuser=new User("","");
     private static FirebaseUser user;
     private static FirebaseAuth auth;
     private static LinkedList<Rpm> RpmList= new LinkedList<>();
@@ -19,6 +21,18 @@ public class SharingValues {
     }
     public static String getName(){
         return FullName;
+    }
+
+    public static void setDBUser(String Email,String Name){
+        DBuser.setEmail(Email);
+        DBuser.setName(Name);
+    }
+    public static User getDBUser(){
+        User u=new User();
+        u.setName(DBuser.getName());
+        u.setEmail(DBuser.getEmail());
+        return u;
+
     }
     public static void setCurrentUser(FirebaseUser u){
 

@@ -12,7 +12,6 @@ public class ActivitySignIn extends AppCompatActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-
         mButton=(Button) findViewById(R.id.login_register);
         findViewById(R.id.login_register).setOnClickListener(this);
     }
@@ -23,6 +22,7 @@ public class ActivitySignIn extends AppCompatActivity implements View.OnClickLis
         if (i == R.id.login_register){
             Intent intent = new Intent(ActivitySignIn.this,LoginActivity.class);
             startActivity(intent);
+            finish();
 
         }
     }
