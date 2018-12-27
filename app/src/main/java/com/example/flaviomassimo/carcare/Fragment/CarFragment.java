@@ -5,24 +5,29 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.PopupMenu;
-import android.widget.Spinner;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import com.example.flaviomassimo.carcare.Activities.MainMenuActivity;
+import com.example.flaviomassimo.carcare.Activities.AddCarActivity;
+import com.example.flaviomassimo.carcare.Activities.InterventionActivity;
+import com.example.flaviomassimo.carcare.Activities.SharingValues;
 import com.example.flaviomassimo.carcare.DataBase.Car;
 import com.example.flaviomassimo.carcare.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,15 +47,26 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
     private String mParam1;
     private String mParam2;
 
+
+    ArrayList<String> listItems = new ArrayList<String>();
+    ArrayList<String> listKeys = new ArrayList<String>();
+    ArrayAdapter<String> adapter;
+
+
+    private ListView list_cars;
+    private TextView noCars;
+    private TextView carInfo;
+    private Iterable<DataSnapshot> cars,infos;
+    private boolean existingCars=false;
     private OnFragmentInteractionListener mListener;
-    private Spinner showMenu;
-    private EditText license,make,model,km;
+
     private Button addCar;
+    private Button addInterventions;
+    private Button updateCarInfo;
     private Car car=new Car();
     private DatabaseReference mRef;
     String UID;
     FirebaseUser user;
-    private static final String[] items = {"Gasoline", "Petrol", "GPL", "Other"};
     public CarFragment() {
         // Required empty public constructor
     }
@@ -77,51 +93,89 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view= inflater.inflate(R.layout.fragment_car, container, false);
-        user= FirebaseAuth.getInstance().getCurrentUser();
-        UID=user.getUid().toString();
-        mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
+        final View view= inflater.inflate(R.layout.fragment_car, container, false);
+        list_cars = (ListView) view.findViewById(R.id.carsList);
 
-        showMenu=(Spinner) view.findViewById(R.id.show_dropdown_menu);
-        license=(EditText) view.findViewById(R.id.LicensePlate);
-        make=(EditText) view.findViewById(R.id.Make);
-        model=(EditText) view.findViewById(R.id.Model);
-        km=(EditText) view.findViewById(R.id.Km);
         addCar=(Button) view.findViewById(R.id.addButton);
         addCar.setOnClickListener(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_spinner_item, items);
-        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-        showMenu.setAdapter(adapter);
-        showMenu.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        updateCarInfo=(Button) view.findViewById(R.id.update_car_info);
+        updateCarInfo.setOnClickListener(this);
+        updateCarInfo.setVisibility(View.GONE);
+        addInterventions=(Button) view.findViewById(R.id.interventions);
+        addInterventions.setOnClickListener(this);
+        addInterventions.setVisibility(View.GONE);
+
+        carInfo=(TextView) view.findViewById(R.id.carInfo);
+        carInfo.setVisibility(View.GONE);
+        noCars =(TextView) view.findViewById(R.id.noCars);
+        user= FirebaseAuth.getInstance().getCurrentUser();
+        UID=user.getUid().toString();
+
+        mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
+        mRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                        car.setFUEL_TYPE("Gasoline");
-                        break;
-                    case 1:
-                        car.setFUEL_TYPE("Petrol");
-                        break;
-                    case 2:
-                        car.setFUEL_TYPE("GPL");
-                        break;
-                    case 3:
-                        car.setFUEL_TYPE("Other");
-                        break;
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.child("Users").child(UID).hasChild("Cars"))existingCars=false;
+                else{
+                    noCars.setVisibility(View.INVISIBLE);
+                    existingCars=true;
+                    cars=dataSnapshot.child("Users").child(UID).child("Cars").getChildren();
+
+                        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, listItems);
+                        list_cars.setAdapter(adapter);
+                        list_cars.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                        list_cars.setOnItemClickListener(
+                                new AdapterView.OnItemClickListener() {
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        updateCarInfo.setVisibility(View.VISIBLE);
+                                        addInterventions.setVisibility(View.VISIBLE);
+                                        carInfo.setVisibility(View.VISIBLE);
+                                        addCar.setVisibility(View.GONE);
+                                        String plate=listItems.get(position).toString();
+                                        infos= dataSnapshot.child("Users").child(UID).child("Cars").child(plate).getChildren();
+                                        String temp="Plate:   "+plate+"\n";
+                                        Car newCar=new Car(plate);
+                                        newCar.setMODEL(dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Model").getValue().toString());
+                                        newCar.setMAKE(dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Make").getValue().toString());
+                                        newCar.setKM(Double.parseDouble(dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Km").getValue().toString()));
+                                        newCar.setFUEL_TYPE(dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Fuel").getValue().toString());
+                                        SharingValues.setCar(newCar);
+
+                                            temp+="Make:   "+newCar.getMAKE()+"\n"+"Model:   "+newCar.getMODEL()+"\n";
+                                            temp+="Km:   "+newCar.getKM()+"\n"+"Fuel:   "+newCar.getFUEL_TYPE()+"\n";
+
+
+                                        carInfo.setText(temp);
+                                    }
+                                });
+                        adapter.clear();
+                        listItems.clear();
+                        while (cars.iterator().hasNext()) {
+                            DataSnapshot singlecar = cars.iterator().next();
+                            String plate = singlecar.getKey().toString();
+                            listItems.add(plate);
+                        }
+
+
                 }
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
+
+        System.out.println("ExistingCArs "+existingCars);
+        System.out.println(cars);
+
+
         return view;
 
     }
@@ -130,9 +184,11 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
+
         }
     }
 
+//TODO Vedere l'onBackPressed per i fragment, al fi<ne di evitare l'uscita dall'app
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -153,54 +209,18 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if(i==R.id.addButton){ createCar(); }
+        if(i==R.id.addButton){ Intent intent=new Intent(getActivity(), AddCarActivity.class); startActivity(intent); }
+        if(i==R.id.update_car_info){
+            Intent intent=new Intent(getActivity(), AddCarActivity.class); startActivity(intent);
+        }
+        if(i==R.id.interventions){Intent intent=new Intent(getActivity(), InterventionActivity.class); startActivity(intent);}
     }
 
 
 
 
 
-    private void createCar(){
-        if(validateForm()){
-            car.setLICENSE_PLATE(license.getText().toString());
-            car.setKM(Double.parseDouble(km.getText().toString()));
-            if(make.getText()!=null){
-                car.setMAKE(make.getText().toString());
-            }
-            if(model.getText()!=null){
-                car.setMODEL(model.getText().toString());
-            }
-            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE());
-            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Make").setValue(car.getMAKE());
-            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Model").setValue(car.getMODEL());
-            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Km").setValue(car.getKM());
-            mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Fuel").setValue(car.getFUEL_TYPE());
-            System.out.println(car.getKM()+" "+car.getLICENSE_PLATE()+" "+car.getMAKE()+" "+car.getMODEL()+" "+car.getFUEL_TYPE());
-            Intent j =new Intent(getActivity(), MainMenuActivity.class); startActivity(j);
-        }
 
-    }
-    private boolean validateForm() {
-        boolean valid = true;
-
-        String plate = license.getText().toString();
-        if (TextUtils.isEmpty(plate)) {
-            license.setError("Required.");
-            valid = false;
-        } else {
-            license.setError(null);
-        }
-
-        String kilometers = km.getText().toString();
-        if (TextUtils.isEmpty(kilometers)) {
-            km.setError("Required.");
-            valid = false;
-        } else {
-            km.setError(null);
-        }
-
-        return valid;
-    }
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         int i= view.getId();
@@ -228,6 +248,8 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+
 
     /**
      * This interface must be implemented by activities that contain this

@@ -1,86 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragment.CarFragment"
-    android:background="?android:windowBackground">
+    android:background="?android:windowBackground"
+    tools:context=".Fragment.CarFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <RelativeLayout
-        android:id="@+id/layoutInsertCar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
 
-        <EditText
-            android:id="@+id/LicensePlate"
-            android:layout_width="192dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:ems="10"
-            android:hint="@string/license"
-            android:inputType="text" />
+    <ListView
+        android:id="@+id/carsList"
+        android:layout_width="wrap_content"
+        android:layout_height="194dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.022" />
 
-        <EditText
-            android:id="@+id/Make"
-            android:layout_width="192dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="82dp"
-            android:ems="10"
-            android:hint="@string/make"
-            android:inputType="text" />
+    <TextView
+        android:id="@+id/noCars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/biorhyme"
+        android:text="There are no cars in your garage, please add one."
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.063" />
 
-        <EditText
-            android:id="@+id/Model"
-            android:layout_width="192dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="151dp"
-            android:ems="10"
-            android:hint="@string/model"
-            android:inputType="text" />
+    <Button
+        android:id="@+id/update_car_info"
+        android:layout_width="121dp"
+        android:layout_height="61dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/my_button"
+        android:onClick="onClick"
+        android:text="Update Values"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.031"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.982" />
 
-        <EditText
-            android:id="@+id/Km"
-            android:layout_width="192dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="215dp"
-            android:ems="10"
-            android:hint="@string/km"
-            android:inputType="number" />
+    <Button
+        android:id="@+id/interventions"
+        android:layout_width="121dp"
+        android:layout_height="61dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/my_button"
+        android:onClick="onClick"
+        android:text="Interventions"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.926"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.982" />
 
-        <Spinner
-            android:id="@+id/show_dropdown_menu"
-            android:layout_width="190dp"
-            android:layout_height="36dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="192dp"
-            android:background="@drawable/my_button"
-            android:spinnerMode="dropdown"
-            android:text="Select Fuel Type "
-            android:textColor="#fff" />
+    <Button
+        android:id="@+id/addButton"
+        android:layout_width="65dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/my_button"
+        android:onClick="onClick"
+        android:text="+"
+        android:textSize="38sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.981" />
 
-        <Button
-            android:id="@+id/addButton"
-            android:layout_width="64dp"
-            android:layout_height="58dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="30dp"
-            android:background="@drawable/my_button"
-            android:onClick="onClick"
-            android:text="Add Car" />
+    <TextView
+        android:id="@+id/carInfo"
+        android:layout_width="343dp"
+        android:layout_height="252dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="68dp"
+        android:fontFamily="@font/biorhyme"
+        android:text=""
+        android:textColor="@android:color/black"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.622" />
 
-    </RelativeLayout>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

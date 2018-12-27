@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -23,6 +24,11 @@ import android.widget.TextView;
 import com.example.flaviomassimo.carcare.Activities.Other.BluetoothSocketShare;
 import com.example.flaviomassimo.carcare.Fragment.*;
 import com.example.flaviomassimo.carcare.R;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -43,10 +49,15 @@ public class MainMenuActivity extends AppCompatActivity
     String last_name,first_name;
     String UID;
     FirebaseUser user;
+    GoogleSignInAccount account;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        final TextView txtProfileName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.NameUser);
+        final TextView txtProfileEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.MailUser);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         text=(TextView) findViewById(R.id.welcome);
@@ -56,6 +67,7 @@ public class MainMenuActivity extends AppCompatActivity
         addName=(Button) findViewById(R.id.buttonNameSurname);
         setVisibility(false);
         user=FirebaseAuth.getInstance().getCurrentUser();
+        System.out.println("User "+user);
         UID=user.getUid().toString();
         mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
         mRef.child("Users").child(UID).child("Email").setValue(user.getEmail().toString());
@@ -67,6 +79,8 @@ public class MainMenuActivity extends AppCompatActivity
                     String o=dataSnapshot.child("Users").child(UID).child("Name").getValue().toString();
                     String temp="Hey "+o+"!\n"+text.getText().toString();
                     text.setText(temp);
+                    txtProfileName.setText(o);
+                    txtProfileEmail.setText(dataSnapshot.child("Users").child(UID).child("Email").getValue().toString());
                 }
                     //showData(dataSnapshot);
             }
@@ -82,8 +96,7 @@ public class MainMenuActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     private void setVisibility(Boolean bool){
@@ -215,9 +228,10 @@ public class MainMenuActivity extends AppCompatActivity
                 startActivity(i);}
         }
         else if(id==R.id.nav_logout){
-
+            account = GoogleSignIn.getLastSignedInAccount(this);
+            if(SharingValues.getGoogleSignInClient()!=null) {signOut();FirebaseAuth.getInstance().signOut();}
             SharingValues.setLogOut(true);
-            Intent i = new Intent(MainMenuActivity.this,LoginActivity.class);
+            Intent i = new Intent(MainMenuActivity.this,ActivitySignIn.class);
             startActivity(i);
         }
 
@@ -260,5 +274,10 @@ public class MainMenuActivity extends AppCompatActivity
             onClickInsertion();
 
         }
+    }
+    private void signOut() {
+        GoogleSignInClient gsc=SharingValues.getGoogleSignInClient();
+        gsc.signOut();
+        SharingValues.setGoogleSignInClient(null);
     }
 }

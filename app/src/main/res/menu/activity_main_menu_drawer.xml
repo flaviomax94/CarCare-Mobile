@@ -16,7 +16,7 @@
         <item
             android:id="@+id/nav_garage"
             android:icon="@drawable/garage_nero"
-            android:title="My car" />
+            android:title="My garage" />
 
         <item
             android:id="@+id/nav_graph"
@@ -36,7 +36,7 @@
             android:title="Bluetooth Connection" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Other">
         <menu>
             <item
                 android:id="@+id/nav_share"
