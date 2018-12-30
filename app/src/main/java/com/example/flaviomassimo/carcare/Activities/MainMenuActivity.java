@@ -140,6 +140,7 @@ public class MainMenuActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+
     }
 
     @Override
@@ -172,7 +173,7 @@ public class MainMenuActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_garage) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CarFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CarFragment()).addToBackStack("Garage").commit();
             setVisibility(false);
         }
 
@@ -189,11 +190,11 @@ public class MainMenuActivity extends AppCompatActivity
 
         else if (id == R.id.nav_graph) {
             if(socket==null){
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).addToBackStack("Bluetooth").commit();
                 setVisibility(false);
             }
             else if(!socket.isConnected()){
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).addToBackStack("Bluetooth").commit();
                 setVisibility(false);
             }
             else if(socket.isConnected()){
@@ -204,14 +205,14 @@ public class MainMenuActivity extends AppCompatActivity
                     }
                 else{
                         setVisibility(false);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).commit();
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new BluetoothAlertFragment()).addToBackStack("Bluetooth").commit();
                     }
                  }
             }
 
 
         else if (id == R.id.nav_notifications) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new NotificationFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new NotificationFragment()).addToBackStack("Notification").commit();
             setVisibility(false);
         }
 

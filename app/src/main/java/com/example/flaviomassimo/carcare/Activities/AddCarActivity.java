@@ -104,7 +104,7 @@ public class AddCarActivity extends AppCompatActivity implements View.OnClickLis
                         else if(fuel.equals("GPL")) temp=2;
                             else temp=3;
                     showMenu.setSelection(temp);
-                    SharingValues.setCar(null);
+
                     }
                 else{
                     updateCar.setVisibility(View.GONE);
@@ -123,8 +123,7 @@ public class AddCarActivity extends AppCompatActivity implements View.OnClickLis
         int i = v.getId();
         if(i==R.id.addButton){ createCar(); }
         if(i==R.id.updateCar){
-            System.out.println("------------------HEILAAAAAAAA------------------------");
-            updateCar();
+            updateCar();SharingValues.setCar(null);
         }
     }
 
@@ -186,10 +185,13 @@ private void updateCar() {
         }
 
         String kilometers = km.getText().toString();
+
+
         if (TextUtils.isEmpty(kilometers)) {
             km.setError("Required.");
             valid = false;
-        } else {
+        }
+        else {
             km.setError(null);
         }
 

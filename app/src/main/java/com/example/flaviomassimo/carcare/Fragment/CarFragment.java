@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.example.flaviomassimo.carcare.Activities.AddCarActivity;
 import com.example.flaviomassimo.carcare.Activities.InterventionActivity;
+import com.example.flaviomassimo.carcare.Activities.MainMenuActivity;
 import com.example.flaviomassimo.carcare.Activities.SharingValues;
 import com.example.flaviomassimo.carcare.DataBase.Car;
 import com.example.flaviomassimo.carcare.R;
@@ -265,4 +267,5 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
 }
