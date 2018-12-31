@@ -190,7 +190,6 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
         }
     }
 
-//TODO Vedere l'onBackPressed per i fragment, al fi<ne di evitare l'uscita dall'app
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

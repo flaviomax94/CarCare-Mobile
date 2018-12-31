@@ -2,6 +2,7 @@ package com.example.flaviomassimo.carcare.Activities;
 
 import com.example.flaviomassimo.carcare.DataBase.Car;
 import com.example.flaviomassimo.carcare.DataBase.Intervention;
+import com.example.flaviomassimo.carcare.DataBase.Path;
 import com.example.flaviomassimo.carcare.DataBase.User;
 import com.example.flaviomassimo.carcare.DataBase.Rpm;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -14,6 +15,7 @@ public class SharingValues {
 
     private static String FullName="";
     private static Car car;
+    private static Path path;
     private static Intervention intervention;
     private static boolean logout=false;
     private static User DBuser=new User("","");
@@ -44,6 +46,8 @@ public class SharingValues {
     public static Intervention getIntervention(){return intervention;}
     public static void setCar(Car c){car=c;}
     public static Car getCar(){return car;}
+    public static void setPath(Path p){path=p;}
+    public static Path getPath(){return path;}
     public static void setGoogleSignInClient(GoogleSignInClient gsic){
         mGoogleSignInClient=gsic;
     }

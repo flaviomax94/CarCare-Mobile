@@ -39,7 +39,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class MainMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,BluetoothAlertFragment.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,
-        CarFragment.OnFragmentInteractionListener,View.OnClickListener {
+        CarFragment.OnFragmentInteractionListener,View.OnClickListener,PathsFragment.OnFragmentInteractionListener {
     BluetoothSocket socket = BluetoothSocketShare.getBluetoothSocket();
     private DatabaseReference mRef;
     private FirebaseAuth fireBaseAuth;
@@ -185,7 +185,13 @@ public class MainMenuActivity extends AppCompatActivity
         }
 
 
-        else if (id == R.id.nav_paths) {}
+        else if (id == R.id.nav_paths) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new PathsFragment()).addToBackStack("Garage").commit();
+            setVisibility(false);
+           // Intent i = new Intent(MainMenuActivity.this,PreviousPathsActivity.class);
+            //startActivity(i);
+            //finish();
+        }
 
 
         else if (id == R.id.nav_graph) {
