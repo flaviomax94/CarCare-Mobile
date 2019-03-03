@@ -11,11 +11,18 @@ import com.example.flaviomassimo.carcare.Activities.Other.BluetoothSocketShare;
 import com.example.flaviomassimo.carcare.Activities.SharingValues;
 import com.example.flaviomassimo.carcare.DataBase.Rpm;
 import com.example.flaviomassimo.carcare.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.Covariance;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +35,9 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
     private NotificationManager mNotificationManager ;
     private NotificationCompat.Builder mBuilder;
     private PendingIntent pendingIntent;
+    private DatabaseReference mDataBase;
+    String UID;
+    FirebaseUser user;
 
     public NOTIFICATION_Thread (NotificationChannel chan, NotificationManager man, NotificationCompat.Builder build,PendingIntent pending) {
 
@@ -36,6 +46,9 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
         mNotificationManager=man;
         mBuilder=build;
         pendingIntent=pending;
+        user= FirebaseAuth.getInstance().getCurrentUser();
+        UID=user.getUid().toString();
+        mDataBase= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
     }
 
 
@@ -54,6 +67,8 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
                             createNotification("BE CAREFUL!", "You're over the maximum speed limit!", R.drawable.rpm_nero);
                             mNotificationManager.notify(0, mBuilder.build());
                             sendedSpeed=true;
+                            Date currentTime = Calendar.getInstance().getTime();
+                            mDataBase.child("Users").child(UID).child("Notifications").child(currentTime.toString()).child("High Speed Notification");
                         }
                     }
                 }
@@ -66,9 +81,11 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
                 if((covariance_soil>600000|| soil_counter>100) && !sendedRPM){
                     covariance_soil=0;
                     soil_counter=0;
-                    createNotification("WARNING!","You have a reckless driving for a "+BluetoothSocketShare.getFuelType()+" car!",R.drawable.icona_auto);
+                    createNotification("WARNING!","You have a reckless driving style!",R.drawable.icona_auto);
                     mNotificationManager.notify(0, mBuilder.build());
                     sendedRPM=true;
+                    Date currentTime = Calendar.getInstance().getTime();
+                    mDataBase.child("Users").child(UID).child("Notifications").child(currentTime.toString()).child("Reckless Guide Notification");
 
                 }
 
@@ -77,7 +94,7 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
 
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("NOTIFICATION THREAD INTERRUPTED----------------------------");
             }
 
         }

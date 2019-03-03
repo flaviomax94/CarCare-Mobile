@@ -3,12 +3,27 @@ package com.example.flaviomassimo.carcare.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.flaviomassimo.carcare.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,7 +42,14 @@ public class NotificationFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
+    private ListView list_notifications;
+    private TextView noNotification;
+    private DatabaseReference mDataBase;
+    private Iterable<DataSnapshot> notifications;
+    ArrayList<String> listItemsNotifications = new ArrayList<String>();
+    ArrayAdapter<String> adapterNotifications;
+    String UID;
+    FirebaseUser user;
     private OnFragmentInteractionListener mListener;
 
     public NotificationFragment() {
@@ -55,17 +77,57 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_notification, container, false);
+        final View view= inflater.inflate(R.layout.fragment_notification, container, false);
+        list_notifications = (ListView) view.findViewById(R.id.notificationsList);
+        noNotification =(TextView) view.findViewById(R.id.noNotification);
+        noNotification.setVisibility(View.VISIBLE);
+        user= FirebaseAuth.getInstance().getCurrentUser();
+        UID=user.getUid().toString();
+        mDataBase= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
+        mDataBase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("Users").child(UID).hasChild("Notifications")){
+                    noNotification.setVisibility(View.GONE);
+                    notifications=dataSnapshot.child("Users").child(UID).child("Notifications").getChildren();
+                    adapterNotifications = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, listItemsNotifications);
+                    list_notifications.setAdapter(adapterNotifications);
+                    list_notifications.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                    list_notifications.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                        }
+                    });
+
+                    adapterNotifications.clear();
+                    while (notifications.iterator().hasNext()) {
+                        DataSnapshot singlenotification = notifications.iterator().next();
+                        String date = singlenotification.getKey().toString();
+                        String value=singlenotification.getValue().toString();
+                        listItemsNotifications.add(date+"\n\t\t"+value);
+                    }
+
+                }
+                else{
+                    list_notifications.setVisibility(View.GONE);
+                    noNotification.setVisibility(View.VISIBLE);
+                    }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

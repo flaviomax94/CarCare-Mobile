@@ -36,7 +36,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
+import com.google.firebase.storage.*;
 public class MainMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,BluetoothAlertFragment.OnFragmentInteractionListener,NotificationFragment.OnFragmentInteractionListener,
         CarFragment.OnFragmentInteractionListener,View.OnClickListener,PathsFragment.OnFragmentInteractionListener {
@@ -46,6 +46,7 @@ public class MainMenuActivity extends AppCompatActivity
     private EditText first,last;
     private TextView text;
     private Button addName;
+    //FirebaseStorage storage = FirebaseStorage.getInstance();
     String last_name,first_name;
     String UID;
     FirebaseUser user;
@@ -77,7 +78,7 @@ public class MainMenuActivity extends AppCompatActivity
                 if(!dataSnapshot.child("Users").child(UID).hasChild("Name"))setVisibility(true);
                 else{
                     String o=dataSnapshot.child("Users").child(UID).child("Name").getValue().toString();
-                    String temp="Hey "+o+"!\n"+text.getText().toString();
+                    String temp="\nHey "+o+"!\n"+text.getText().toString();
                     text.setText(temp);
                     txtProfileName.setText(o);
                     txtProfileEmail.setText(dataSnapshot.child("Users").child(UID).child("Email").getValue().toString());
@@ -159,7 +160,9 @@ public class MainMenuActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent i =new Intent(MainMenuActivity.this,AboutActivity.class);
+            startActivity(i);
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -177,13 +180,11 @@ public class MainMenuActivity extends AppCompatActivity
             setVisibility(false);
         }
 
-
-        else if (id == R.id.nav_home) {
-            Intent i = new Intent(MainMenuActivity.this,MainMenuActivity.class);
-             startActivity(i);
-             finish();
+        else if (id == R.id.nav_how) {
+            Intent i = new Intent(MainMenuActivity.this,HowToActivity.class);
+            startActivity(i);
+            finish();
         }
-
 
         else if (id == R.id.nav_paths) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new PathsFragment()).addToBackStack("Garage").commit();

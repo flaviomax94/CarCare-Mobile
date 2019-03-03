@@ -26,6 +26,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+
+import com.google.firebase.storage.*;
 public class RPM_Thread extends Application implements Runnable {
     BluetoothSocket socket;
     LinkedList<Rpm> rpmLinkedList= SharingValues.getRpmList();
@@ -37,6 +39,8 @@ public class RPM_Thread extends Application implements Runnable {
     InputStream in;
     OutputStream out;
     String ris;
+
+    //FirebaseStorage mFirebaseStorage=FirebaseStorage.get;
     public RPM_Thread(LocationManager locM, GPSListener locL) {
 
         socket = BluetoothSocketShare.getBluetoothSocket();
@@ -96,23 +100,25 @@ public class RPM_Thread extends Application implements Runnable {
                 rpm.setSpeed(speedValue);
                 //String result="\n Date: "+rpm.getDate().toString()+"   "+"Rpm: "+rpm.getRpmValue()+"   "+"Millis: "+rpm.getId()+"   "+
                 //"Speed: "+rpm.getSpeed()+"   "+"Fuel: "+rpm.getFuelType()+"   "+"Position: ";
-                String result="\n"+rpm.getRpmValue()+","+rpm.getId()+","+rpm.getSpeed();
+                String result=rpm.getRpmValue()+" "+rpm.getId()+" "+rpm.getSpeed();
 
                 if(locationManager.isProviderEnabled( LocationManager.GPS_PROVIDER )){
                     Location loc=getLastKnownLocation();
                     locationListener.onLocationChanged(loc);
                     rpm.setPosition(locationListener.getLocation());
-                    result=result+","+(rpm.getPosition().toString());
+                    result=result+" "+(rpm.getPosition().toString());
 
                 }
                 else {
-                    result=result+"Unknown";
+                    result=result+" Unknown";
                 }
 
                 System.out.println(result);
                 pw.println(result);
                 System.out.println(pw);
                 System.out.println(output);
+                pw.flush();
+                pw.println("\n");
                 pw.flush();
 
                rpmLinkedList.add(rpm);
@@ -122,7 +128,7 @@ public class RPM_Thread extends Application implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("RPM THREAD INTERRUPTED----------------------");
             }
 
 

@@ -9,13 +9,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.File;
 import java.util.LinkedList;
 
 public class SharingValues {
 
     private static String FullName="";
     private static Car car;
-    private static Path path;
+    private static File path;
     private static Intervention intervention;
     private static boolean logout=false;
     private static User DBuser=new User("","");
@@ -23,6 +24,8 @@ public class SharingValues {
     private static FirebaseAuth auth;
     private static GoogleSignInClient mGoogleSignInClient;
     private static LinkedList<Rpm> RpmList= new LinkedList<>();
+    public static Thread NOTIFICATION_THREAD;
+    public static Thread RPM_THREAD;
     public static void setFullName(String name){
 
         FullName=name;
@@ -42,12 +45,19 @@ public class SharingValues {
         return u;
 
     }
+
+    public static void setNotificationThread(Thread T){NOTIFICATION_THREAD=T;}
+    public static Thread getNotificationThread(){return NOTIFICATION_THREAD;}
+    public static void setRpmThread(Thread T){RPM_THREAD=T;}
+    public static Thread getRpmThread(){return RPM_THREAD;}
+
+
     public static void setIntervention(Intervention i){intervention=i;}
     public static Intervention getIntervention(){return intervention;}
     public static void setCar(Car c){car=c;}
     public static Car getCar(){return car;}
-    public static void setPath(Path p){path=p;}
-    public static Path getPath(){return path;}
+    public static void setPath(File f){path=f;}
+    public static File getPath(){return path;}
     public static void setGoogleSignInClient(GoogleSignInClient gsic){
         mGoogleSignInClient=gsic;
     }

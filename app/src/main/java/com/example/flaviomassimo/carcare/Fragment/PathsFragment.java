@@ -1,9 +1,12 @@
 package com.example.flaviomassimo.carcare.Fragment;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.flaviomassimo.carcare.Activities.AddCarActivity;
 import com.example.flaviomassimo.carcare.Activities.PreviousPathsActivity;
@@ -20,6 +24,8 @@ import com.example.flaviomassimo.carcare.Activities.SharingValues;
 import com.example.flaviomassimo.carcare.DataBase.Car;
 import com.example.flaviomassimo.carcare.DataBase.Path;
 import com.example.flaviomassimo.carcare.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,8 +33,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -51,8 +61,11 @@ public class PathsFragment extends Fragment implements View.OnClickListener{
     ArrayList<String> listItemsCars = new ArrayList<String>();
     ArrayList<String> listItemsPaths = new ArrayList<String>();
     ArrayAdapter<String> adapterCars,adapterPaths;
-
-
+    private StorageReference mStorageRef;
+    private DatabaseReference mDataBase;
+    String UID;
+    FirebaseUser user;
+    File localFile;
     private ListView list_cars;
     private ListView list_paths;
 
@@ -64,8 +77,6 @@ public class PathsFragment extends Fragment implements View.OnClickListener{
     private Car car=new Car();
     private DatabaseReference mRef;
     private String plate;
-    String UID;
-    FirebaseUser user;
     private OnFragmentInteractionListener mListener;
 
     public PathsFragment() {
@@ -108,6 +119,7 @@ public class PathsFragment extends Fragment implements View.OnClickListener{
         noPaths.setVisibility(View.GONE);
         user= FirebaseAuth.getInstance().getCurrentUser();
         UID=user.getUid().toString();
+        mStorageRef = FirebaseStorage.getInstance().getReference();
 
         mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
         mRef.addValueEventListener(new ValueEventListener() {
@@ -130,9 +142,12 @@ public class PathsFragment extends Fragment implements View.OnClickListener{
 
                     list_cars.setOnItemClickListener( new AdapterView.OnItemClickListener() {
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            adapterPaths.clear();
+                            listItemsPaths.clear();
                             list_paths.setVisibility(View.VISIBLE);
-
+                            noPaths.setVisibility(View.GONE);
                             plate=listItemsCars.get(position).toString();
+
                             if(plate!=null){
                                 if(!dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Paths").hasChildren()){
                                     list_paths.setVisibility(View.GONE);
@@ -140,6 +155,7 @@ public class PathsFragment extends Fragment implements View.OnClickListener{
                                 }
                             }
                             paths=dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Paths").getChildren();
+
                             while (paths.iterator().hasNext()) {
                                 System.out.println("--------------ELEMENT------------------");
                                 DataSnapshot singlePath = paths.iterator().next();
@@ -150,25 +166,47 @@ public class PathsFragment extends Fragment implements View.OnClickListener{
                         }
                     });
 
-
                     list_paths.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            String path=listItemsPaths.get(position).toString();
-                            Iterable<DataSnapshot> file=dataSnapshot.child("Users").child(UID).child("Cars").
-                                    child(plate).child("Paths").child(path).child("File").getChildren();
-                            File f= (File) file.iterator().next().getValue();
-                            Path pathObject=new Path(f,path);
-                            SharingValues.setPath(pathObject);
-                            seePath.setVisibility(View.VISIBLE);
-                            seePath.setClickable(true);
+                            Toast.makeText(getContext(),"Please wait, the download is starting",Toast.LENGTH_SHORT).show();
+                            String pathName=listItemsPaths.get(position).toString();
+                            System.out.println(pathName);
+                            String pathURL= dataSnapshot.child("Users").child(UID).child("Cars").child(plate).child("Paths").child(pathName).getValue().toString();
+                            System.out.println(pathURL);
+                            mStorageRef = FirebaseStorage.getInstance().getReferenceFromUrl(pathURL);
+
+                                localFile =new File(getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),"filePath.txt");
+                            try {
+                                localFile.createNewFile();
+                            } catch (IOException e) {
+                                System.out.println("ERROR IN CREATION OF TEMP FILE----------");
+                            }
+                            mStorageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    Toast.makeText(getContext(),"Path ready to be seen!",Toast.LENGTH_SHORT).show();
+                                    SharingValues.setPath(localFile);
+                                    System.out.println("FILE DOWNLOADED-------------");
+                                    System.out.println(SharingValues.getPath().toString());
+                                    seePath.setVisibility(View.VISIBLE);
+                                    seePath.setClickable(true);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    System.out.println("ERROR ON DOWNLOAD FILE FROM STORAGE------");
+                                }
+                            });
+
+
+
                         }
                     });
 
 
                     adapterCars.clear();
-                    listItemsPaths.clear();
-                    listItemsPaths.clear();
+                    adapterPaths.clear();
                     while (cars.iterator().hasNext()) {
                         DataSnapshot singlecar = cars.iterator().next();
                         String plate = singlecar.getKey().toString();

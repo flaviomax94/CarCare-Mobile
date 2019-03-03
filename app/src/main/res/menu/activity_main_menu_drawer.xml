@@ -8,10 +8,7 @@
 
 
 
-        <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/icona_home"
-            android:title="Home" />
+
 
         <item
             android:id="@+id/nav_garage"
@@ -39,12 +36,12 @@
     <item android:title="Other">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/nav_how"
+                android:icon="@drawable/how"
+                android:title="How to use this app" />
             <item
                 android:id="@+id/nav_logout"
-                android:icon="@drawable/ic_logout"
+                android:icon="@drawable/exit"
                 android:title="Log Out" />
         </menu>
     </item>

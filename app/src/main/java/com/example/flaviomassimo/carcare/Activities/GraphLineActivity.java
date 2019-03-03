@@ -19,17 +19,28 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GraphLineActivity extends AppCompatActivity {
+public class GraphLineActivity extends AppCompatActivity implements View.OnClickListener {
     LinkedList<Rpm> rpmLinkedList= SharingValues.getRpmList();
     private LineChart mChart;
     public static LineDataSet dataset=null;
     private Thread changingValues;
+    DatabaseReference mRef;
+    String UID;
+    String fuelDB="";
+    FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,10 +50,16 @@ public class GraphLineActivity extends AppCompatActivity {
         BluetoothSocket socket= BluetoothSocketShare.getBluetoothSocket();
         TextView RPMtext = (TextView) findViewById(R.id.insertRPM);
         TextView SPEEDtext = (TextView) findViewById(R.id.insertKM);
+        ImageButton refresh=(ImageButton)findViewById(R.id.refresh);
+        refresh.setOnClickListener(this);
 
+        user= FirebaseAuth.getInstance().getCurrentUser();
+        UID=user.getUid().toString();
+        mRef= FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
         if(socket!=null){
             changingValues= new Thread((new ChangingValuesThread(RPMtext,SPEEDtext)));
             changingValues.start();
+            System.out.println("CHANGING VALUES THREAD STARTED............................");
         }
         else{
             RPMtext.setText("------");
@@ -63,12 +80,25 @@ public class GraphLineActivity extends AppCompatActivity {
         }
 
 
-        dataset= new LineDataSet(entries,"RPM Graph values (one per second)");
+        dataset= new LineDataSet(entries,"RPM Graph values");
 
         LineData data= new LineData(dataset);
         Description d= new Description();
         Rpm first= rpmLinkedList.getFirst();
-        String fuelDB=first.getFuelType();
+
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                fuelDB=dataSnapshot.child("Users").child(UID).child("Cars").child(SharingValues.getCar().getLICENSE_PLATE()).child("Fuel").getValue().toString();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         d.setText(fuelDB);
         d.setTextSize(15);
         mChart.setData(data);
@@ -148,5 +178,15 @@ public class GraphLineActivity extends AppCompatActivity {
         l.add(val8);
 
         rpmLinkedList=l;
+    }
+
+    @Override
+    public void onClick(View v) {
+        int i = v.getId();
+        if(i==R.id.refresh){
+            Intent in =new Intent(GraphLineActivity.this, GraphLineActivity.class);
+            startActivity(in);
+            finish();
+        }
     }
 }

@@ -10,8 +10,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,16 +28,31 @@ import com.example.flaviomassimo.carcare.Activities.Other.BluetoothSocketShare;
 import com.example.flaviomassimo.carcare.R;
 import com.example.flaviomassimo.carcare.Threads.NOTIFICATION_Thread;
 import com.example.flaviomassimo.carcare.Threads.RPM_Thread;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Date;
 
 public class BluetoothDisconnectActivity extends AppCompatActivity implements Serializable {
 
 
     LocationManager locationManager;
     GPSListener locationListener;
+    private StorageReference mStorageRef;
+    private DatabaseReference mDataBase;
+    String UID;
+    FirebaseUser user;
     private NotificationChannel channel;
     private NotificationManager mNotificationManager ;
     private NotificationCompat.Builder mBuilder;
@@ -45,7 +63,8 @@ public class BluetoothDisconnectActivity extends AppCompatActivity implements Se
     InputStream in;
     OutputStream out;
     String ris;
-    //TODO Una volta creato il dataset con Pandas disattivare i commenti e attivare il thread delle notifiche
+    String NameFile;
+    String[] val;
 
     TextView paired;
 
@@ -60,8 +79,11 @@ public class BluetoothDisconnectActivity extends AppCompatActivity implements Se
         String name = BluetoothSocketShare.getBluetoothSocket().getRemoteDevice().getName();
 
         paired.setText("       Bluetooth\n       connected:\n          " + name);
-        if(name.contains("OBD")){
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // nota bene questi thread dovrebbero partire appena la connessione è avvenuta, non quando entro qui
+        // qui dovrebbero solo essere interrotti
+
+       /* locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new GPSListener();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -80,11 +102,8 @@ public class BluetoothDisconnectActivity extends AppCompatActivity implements Se
             RPM_THREAD.start();
             GUIDE_ALERT.start();
         }
-        }
-        else{
-            Toast.makeText(BluetoothDisconnectActivity.this, "Warning this device is not an OBD.Please connect an OBD Device",
-                    Toast.LENGTH_SHORT).show();
-        }
+        */
+
     }
 
 
@@ -99,35 +118,78 @@ public class BluetoothDisconnectActivity extends AppCompatActivity implements Se
 
         public void onClick(View v){
             BluetoothSocketShare.close();
+            RPM_THREAD=SharingValues.getRpmThread();
+            GUIDE_ALERT=SharingValues.getNotificationThread();
+
             if(RPM_THREAD.isAlive())
                 RPM_THREAD.interrupt();
             if(GUIDE_ALERT.isAlive())
                 GUIDE_ALERT.interrupt();
-            /*TODO qui interrompo i thread che collezionano i valori, quando li faccio ripartire(ossia riconnetto il bluetooth)
+            /* qui interrompo i thread che collezionano i valori, quando li faccio ripartire(ossia riconnetto il bluetooth)
             * il file viene ricreato e perdo i valori precedenti, perciò devo caricare qui il file con un nome univoco
             * oppure la lista degli elementi che viene aggiornata nei thread
             * */
+            mDataBase=FirebaseDatabase.getInstance().getReferenceFromUrl("https://carcare-dce03.firebaseio.com/");
+            mStorageRef = FirebaseStorage.getInstance().getReference();
+            user= FirebaseAuth.getInstance().getCurrentUser();
+            UID=user.getUid().toString();
+            NameFile=BluetoothSocketShare.getFile().getName();
+            val= NameFile.split("_");
+            final String CarPlate=val[0];
+            Uri file = Uri.fromFile(BluetoothSocketShare.getFile());
+            final StorageReference FileRef = mStorageRef.child("paths/"+CarPlate+"/"+NameFile);
 
-            Intent intent = new Intent(BluetoothDisconnectActivity.this, BluetoothActivity.class);
-            startActivity(intent);
+            FileRef.putFile(file)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // Get a URL to the uploaded content
 
-        }
-    }
-    public void homeButtonClick(View view){
+                            String downloadURL=taskSnapshot.getMetadata().getReference().getDownloadUrl().toString();
 
-        ImageButton homeButton=(ImageButton) findViewById(R.id.homeButton);
-        homeButton.setOnClickListener(new homeBtnListener());
-    }
+                            FileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    System.out.println(uri.toString());
+                                    System.out.println("TRYING TO INSERT URI IN FIREBASE DATABASE--------------------------");
+                                    System.out.println(val[1]);
+                                    String[] date=val[1].split("\\.");
+                                    System.out.println(date[0]);
+                                    Date data=new Date(Long.parseLong(date[0]));
+                                    System.out.println(data);
+                                    mDataBase.child("Users").child(UID).child("Cars").child(CarPlate).child("Paths").child(data.toString()).setValue(uri.toString());
+                                    System.out.println("INSERTED VALUES IN FIREBASE DATABASE READY TO BE READ-------------------------");
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Handle any errors
+                                }
+                            });
 
-    public class homeBtnListener implements ImageButton.OnClickListener{
 
-        @Override
-        public void onClick(View view) {
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful uploads
+                            // ...
+                            Toast.makeText(getApplicationContext(),"Error in upload file in Firebase Storage",Toast.LENGTH_LONG).show();
+                        }
+                    });
+            //TODO bisogna eliminare il file dallo storage interno
+            File file1=BluetoothSocketShare.getFile();
+            String filename=file1.getName();
+            File file2=new File(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),filename);
+            boolean b=file2.delete();
+            BluetoothSocketShare.setFile(null);
+            if(b){
             Intent intent = new Intent(BluetoothDisconnectActivity.this, MainMenuActivity.class);
-            startActivity(intent);
+            startActivity(intent);}
+
         }
     }
-
 
     public void createChannel(String title, String content) {
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -148,6 +210,12 @@ public class BluetoothDisconnectActivity extends AppCompatActivity implements Se
         pi = PendingIntent.getActivity(this, 0, intentNotification, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
+
+    }
+    public void onBackPressed(){
+        Intent i=new Intent(BluetoothDisconnectActivity.this,MainMenuActivity.class);
+        startActivity(i);
+        finish();
 
     }
 

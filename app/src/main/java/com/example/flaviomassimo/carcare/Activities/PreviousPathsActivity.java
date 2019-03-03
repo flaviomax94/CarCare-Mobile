@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -16,6 +17,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.flaviomassimo.carcare.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -31,7 +33,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -44,6 +54,7 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
     Location mLastLocation;
     Marker mCurrLocationMarker;
     FusedLocationProviderClient mFusedLocationClient;
+    ArrayList<String> listCoordinates=new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +64,16 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
         mapFragment.getMapAsync(this);
+
     }
+
+
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
 
 
         mLocationRequest = new LocationRequest();
@@ -87,15 +100,84 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
         }
 
 
+        File path=SharingValues.getPath();
+        if(path != null)
+            setPath(path);
+        else{
+            Toast.makeText(this,"File not found try another file",Toast.LENGTH_LONG);
+            Intent i=new Intent(PreviousPathsActivity.this,MainMenuActivity.class);
+            startActivity(i);
+            finish();
 
+        }
 
 
     }
 
 
+    public void setPath(File path){
+        listCoordinates=readFile(path);
+        List<LatLng> routeArray = new ArrayList<LatLng>();
+        for(String elem:listCoordinates){
+            String arr[]=elem.split(" ");
+            LatLng pos=new LatLng(Double.parseDouble(arr[0]),Double.parseDouble(arr[1]));
+            System.out.println(pos.toString());
+            routeArray.add(pos);
+        }
+        if (routeArray == null) {
+            Log.e("Draw Line", "got null as parameters");
+            return;
+        }
 
+        Polyline line = mGoogleMap.addPolyline(new PolylineOptions().width(3).color(Color.RED));
+        line.setPoints(routeArray);
+        if(routeArray!=null){
+            LatLng first=routeArray.get(0);
+            mGoogleMap.addMarker(new MarkerOptions().position(first).title("Start"));
+            LatLng last=routeArray.get(routeArray.size()-1);
+            mGoogleMap.addMarker(new MarkerOptions().position(last).title("Finish"));
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(first,14));
+        }
+        /*int i=0;
+        for(LatLng l:routeArray){
+            i++;
+            mGoogleMap.addMarker(new MarkerOptions().position(l).title("step "+i));
+            if(i==1){
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(l,14));
+            }
+        }
+        System.out.println("SETTED POINTS------------------");*/
+    }
 
+    public ArrayList<String> readFile(File f) {
+        ArrayList<String> ris = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            String line=br.readLine();
 
+            while (line != null) {
+               String[] pieces= line.split(" ");
+              if(pieces.length>1){
+                  if (!pieces[3].equals("Unknown")){
+                    String[] pos=pieces[3].split(",");
+                    String latlong=pos[0]+" "+pos[1];
+
+                    if (!ris.contains(latlong)){
+                        ris.add(latlong);
+                   }
+
+               }
+              }
+              line=br.readLine();
+            }
+            br.close();
+        }
+        catch (IOException e) {
+
+        }
+
+        return ris;
+    }
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -156,6 +238,7 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
     }
     @Override
     public void onBackPressed(){
+        //TODO eliminare file in memoria
         Intent intent = new Intent(this,MainMenuActivity.class);
         startActivity(intent);
         finish();

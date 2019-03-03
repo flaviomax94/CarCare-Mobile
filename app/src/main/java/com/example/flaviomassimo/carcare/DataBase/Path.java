@@ -3,11 +3,11 @@ package com.example.flaviomassimo.carcare.DataBase;
 import java.io.File;
 
 public class Path {
-    public File getFILEPATH() {
+    public String getFILEPATH() {
         return FILEPATH;
     }
 
-    public void setFILEPATH(File FILEPATH) {
+    public void setFILEPATH(String FILEPATH) {
         this.FILEPATH = FILEPATH;
     }
 
@@ -19,10 +19,10 @@ public class Path {
         this.PATHNAME = PATHNAME;
     }
 
-    private File FILEPATH;
+    private String FILEPATH;
     private String PATHNAME;
     public Path(){}
-    public Path( File file,String name){
+    public Path( String file,String name){
 
         FILEPATH=file;
         PATHNAME=name;
