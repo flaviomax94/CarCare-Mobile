@@ -126,6 +126,7 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if(!dataSnapshot.child("Users").child(UID).hasChild("Cars"))existingCars=false;
                 else{
+                    if(getActivity()!=null){
                     noCars.setVisibility(View.INVISIBLE);
                     existingCars=true;
                     cars=dataSnapshot.child("Users").child(UID).child("Cars").getChildren();
@@ -166,6 +167,7 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
                         }
 
 
+                }
                 }
             }
             @Override
@@ -210,7 +212,11 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
     @Override
     public void onClick(View v) {
         int i = v.getId();
-        if(i==R.id.addButton){ Intent intent=new Intent(getActivity(), AddCarActivity.class); startActivity(intent); }
+        if(i==R.id.addButton){
+            SharingValues.setCar(null);
+            Intent intent=new Intent(getActivity(), AddCarActivity.class);
+            startActivity(intent);
+        }
         if(i==R.id.update_car_info){
             Intent intent=new Intent(getActivity(), AddCarActivity.class); startActivity(intent);
         }
@@ -263,7 +269,6 @@ public class CarFragment extends Fragment implements View.OnClickListener, Adapt
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 

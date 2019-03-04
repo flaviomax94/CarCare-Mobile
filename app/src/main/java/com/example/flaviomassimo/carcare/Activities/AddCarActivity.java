@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.flaviomassimo.carcare.DataBase.Car;
 import com.example.flaviomassimo.carcare.Fragment.CarFragment;
@@ -22,6 +23,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.concurrent.TimeUnit;
 
 public class AddCarActivity extends AppCompatActivity implements View.OnClickListener,AdapterView.OnItemSelectedListener{
     private ListView list_cars;
@@ -168,6 +171,12 @@ private void updateCar() {
             mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Km").setValue(car.getKM());
             mRef.child("Users").child(UID).child("Cars").child(car.getLICENSE_PLATE()).child("Fuel").setValue(car.getFUEL_TYPE());
             System.out.println(car.getKM()+" "+car.getLICENSE_PLATE()+" "+car.getMAKE()+" "+car.getMODEL()+" "+car.getFUEL_TYPE());
+            Toast.makeText(AddCarActivity.this, "I'm adding the vehicle...", Toast.LENGTH_LONG).show();
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             Intent j =new Intent(this, MainMenuActivity.class); startActivity(j);
             finish();
         }
