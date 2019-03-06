@@ -53,6 +53,7 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
     LocationManager mLocationManager;
     Location mLastLocation;
     Marker mCurrLocationMarker;
+    boolean mylocation;
     FusedLocationProviderClient mFusedLocationClient;
     ArrayList<String> listCoordinates=new ArrayList<String>();
 
@@ -60,6 +61,7 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_previous_paths);
+        mylocation=false;
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
@@ -77,8 +79,8 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
 
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(0);
-        mLocationRequest.setFastestInterval(0);
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         mGoogleMap.setOnMyLocationButtonClickListener(this);
@@ -265,9 +267,11 @@ public class PreviousPathsActivity extends FragmentActivity implements OnMapRead
 
                 // Creating a LatLng object for the current location
                 LatLng myPosition = new LatLng(latitude, longitude);
-
+                if(!mylocation){
                 mGoogleMap.addMarker(new MarkerOptions().position(myPosition).title("Hi! You are here."));
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myPosition,14));
+                mylocation=true;
+                }
 
             }
         }

@@ -78,7 +78,7 @@ public class BluetoothDisconnectActivity extends AppCompatActivity implements Se
 
         String name = BluetoothSocketShare.getBluetoothSocket().getRemoteDevice().getName();
 
-        paired.setText("       Bluetooth\n       connected:\n          " + name);
+        paired.setText(" Bluetooth \nconnected: \n" + name);
 
         // nota bene questi thread dovrebbero partire appena la connessione è avvenuta, non quando entro qui
         // qui dovrebbero solo essere interrotti

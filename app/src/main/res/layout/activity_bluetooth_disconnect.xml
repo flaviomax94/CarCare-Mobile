@@ -10,18 +10,17 @@
 
     <TextView
         android:id="@+id/pb"
-        android:layout_width="380dp"
-        android:layout_height="168dp"
+        android:layout_width="382dp"
+        android:layout_height="194dp"
         android:layout_marginBottom="236dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/biorhyme"
-        android:text="  Bluetooth not \nconnected"
+        android:text="Bluetooth not \nconnected"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         android:textColor="@color/colorAccent"
         android:textSize="40sp"
         app:layout_constraintBottom_toTopOf="@+id/disconnect"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -33,18 +32,19 @@
 
     <ImageView
         android:id="@+id/carconnection"
-        android:layout_width="278dp"
-        android:layout_height="222dp"
+        android:layout_width="355dp"
+        android:layout_height="279dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.615"
-        app:srcCompat="@drawable/carconnection" />
+        app:layout_constraintVertical_bias="0.652"
+        app:srcCompat="@drawable/notconn" />
 
     <Button
         android:id="@+id/disconnect"
@@ -61,6 +61,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
         tools:layout_constraintLeft_creator="1"
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintTop_creator="1" />

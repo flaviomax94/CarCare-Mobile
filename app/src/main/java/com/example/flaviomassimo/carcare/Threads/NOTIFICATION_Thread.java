@@ -22,6 +22,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.Covariance;
 
 import java.util.Calendar;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -63,12 +64,12 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
                     int speedValue = Integer.parseInt(r.getSpeed());
                     if (speedValue != 0) {
                         if (speedValue > 140 && !sendedSpeed) {
-
+                            Date currentTime = Calendar.getInstance().getTime();
+                            mDataBase.child("Users").child(UID).child("Notifications").child(currentTime.toString()).setValue("High Speed Notification");
                             createNotification("BE CAREFUL!", "You're over the maximum speed limit!", R.drawable.rpm_nero);
                             mNotificationManager.notify(0, mBuilder.build());
                             sendedSpeed=true;
-                            Date currentTime = Calendar.getInstance().getTime();
-                            mDataBase.child("Users").child(UID).child("Notifications").child(currentTime.toString()).child("High Speed Notification");
+
                         }
                     }
                 }
@@ -81,11 +82,12 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
                 if((covariance_soil>600000|| soil_counter>100) && !sendedRPM){
                     covariance_soil=0;
                     soil_counter=0;
+                    Date currentTime = Calendar.getInstance().getTime();
+                    mDataBase.child("Users").child(UID).child("Notifications").child(currentTime.toString()).setValue("Reckless Guide Notification");
                     createNotification("WARNING!","You have a reckless driving style!",R.drawable.icona_auto);
                     mNotificationManager.notify(0, mBuilder.build());
                     sendedRPM=true;
-                    Date currentTime = Calendar.getInstance().getTime();
-                    mDataBase.child("Users").child(UID).child("Notifications").child(currentTime.toString()).child("Reckless Guide Notification");
+
 
                 }
 
@@ -93,6 +95,8 @@ public class NOTIFICATION_Thread extends Application implements Runnable {
 
 
 
+            }catch(ConcurrentModificationException x){
+                System.out.println("CONCURRENT MODIFICATION EXCEPTION");
             } catch (InterruptedException e) {
                 System.out.println("NOTIFICATION THREAD INTERRUPTED----------------------------");
             }
